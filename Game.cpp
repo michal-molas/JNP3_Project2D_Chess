@@ -561,7 +561,7 @@ BOOL Game::IsMate(BOOL is_white) {
     return tiles.empty();
 }
 
-BOOL Game::HandleClick(Position pos) {
+GameState Game::HandleClick(Position pos) {
     // pierwsze klikniêcie
 
     if (picked_piece == -1) {
@@ -593,7 +593,13 @@ BOOL Game::HandleClick(Position pos) {
                 who_checks.clear();
                 CheckWhoChecks(!is_white_turn);
                 if (IsMate(!is_white_turn)) {
-                    exit(0);
+                    return GameState::CHECKMATE;
+                }
+            }
+            else {
+                // to mo¿e coœ psuæ
+                if (IsMate(!is_white_turn)) {
+                    return GameState::DRAW;
                 }
             }
 
@@ -602,7 +608,7 @@ BOOL Game::HandleClick(Position pos) {
             picked_piece = -1;
             tiles.clear();
 
-            return TRUE;
+            return GameState::NEXT_TURN;
         }
         // niepoprawne pole
         else {
@@ -618,5 +624,5 @@ BOOL Game::HandleClick(Position pos) {
             }
         }
     }
-    return FALSE;
+    return GameState::SAME_TURN;
 }

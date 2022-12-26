@@ -20,6 +20,14 @@ enum class PieceType
     KNIGHT
 };
 
+enum class GameState
+{
+    SAME_TURN,
+    NEXT_TURN,
+    DRAW,
+    CHECKMATE
+};
+
 struct Position {
     INT x, y;
 
@@ -157,7 +165,7 @@ public:
         return pieces;
     }
 
-    BOOL HandleClick(Position pos);
+    GameState HandleClick(Position pos);
     
 };
 

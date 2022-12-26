@@ -35,6 +35,8 @@ void D2DClass::InitDirect2D(HWND hwnd) {
         &text_format
     );
 
+    text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+
 
     // Utworzenie bitmap
     CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
@@ -47,8 +49,6 @@ void D2DClass::InitDirect2D(HWND hwnd) {
         reinterpret_cast<LPVOID*>(&wic_factory)
     );
 
-    LoadBmp(white_filename, &bmp_white_tile);
-    LoadBmp(black_filename, &bmp_black_tile);
     LoadBmp(knight_white_filename, &bmp_white_knight);
     LoadBmp(knight_black_filename, &bmp_black_knight);
     LoadBmp(bishop_white_filename, &bmp_white_bishop);
@@ -62,7 +62,7 @@ void D2DClass::InitDirect2D(HWND hwnd) {
 
 
     // Utworzenie pêdzla
-    d2d_render_target->CreateSolidColorBrush(brush_color, &brush);
+    d2d_render_target->CreateSolidColorBrush(contour_color, &brush);
 
     // Gradienty
     pawn_white_gradient_stops[0].color = D2D1::ColorF(D2D1::ColorF::Aquamarine, 1);
@@ -208,11 +208,14 @@ void D2DClass::DrawBoard() {
             INT top_pos = board_top + i * tile_size;
             D2D1_RECT_F rect = D2D1::RectF(left_pos, top_pos, left_pos + tile_size, top_pos + tile_size);
             if ((i + j) % 2 == 0) {
-                d2d_render_target->DrawBitmap(bmp_white_tile, &rect);
+                brush->SetColor(white_tile_color);
             }
             else {
-                d2d_render_target->DrawBitmap(bmp_black_tile, &rect);
+                brush->SetColor(black_tile_color);
             }
+            d2d_render_target->FillRectangle(rect, brush);
+            brush->SetColor(contour_color);
+            d2d_render_target->DrawRectangle(rect, brush);
         }
     }
     Position picked_pos = game.GetPickedPos();
@@ -326,7 +329,7 @@ void D2DClass::DrawPieces(){
 }
 
 void D2DClass::HandleMouseClick(FLOAT mouse_x, FLOAT mouse_y) {
-    if (first_move || time > rotation_start_time + rotation_duration) {
+    if (!is_draw && !is_checkmate && (first_move || time > rotation_start_time + rotation_duration)) {
         game.SetWrongPos(Position(-1, -1));
         game.SetPickedPos(Position(-1, -1));
 
@@ -340,11 +343,18 @@ void D2DClass::HandleMouseClick(FLOAT mouse_x, FLOAT mouse_y) {
 
 
             if (row < BOARD_SIZE && col < BOARD_SIZE) {
-                if (game.HandleClick(Position(col, row))) {
+                GameState state = game.HandleClick(Position(col, row));
+                if (state == GameState::NEXT_TURN) {
                     first_move = FALSE;
                     switched = !switched;
                     rotation_start_time = time;
                     count_rotations++;
+                }
+                else if (state == GameState::DRAW) {
+                    is_draw = TRUE;
+                }
+                else if (state == GameState::CHECKMATE) {
+                    is_checkmate = TRUE;
                 }
             }
         }
@@ -357,14 +367,56 @@ void D2DClass::HandleMouseClick(FLOAT mouse_x, FLOAT mouse_y) {
 }
 
 void D2DClass::DrawTexts() {
-    if (game.IsCheck()) {
-        INT left = board_left, right = board_left + BOARD_SIZE * tile_size, top;
-        if (game.IsWhiteTurn()) {
-            top = board_top + BOARD_SIZE * tile_size;
+    if (is_draw || is_checkmate) {
+        INT left = 0;
+        INT right = rc.right;
+        INT top = 0;
+        INT bottom = rc.bottom;
+        
+        transformation = Matrix3x2F::Identity();
+        d2d_render_target->SetTransform(transformation);
+        if (is_draw) {
+            brush->SetColor(text_color_draw);
+            d2d_render_target->DrawText(
+                text_draw,
+                sizeof(text_draw) / sizeof(text_draw[0]),
+                text_format,
+                RectF(
+                    left, 
+                    top,
+                    right,
+                    bottom
+                ),
+                brush
+            );
         }
         else {
-            top = board_top - tile_size;
+            brush->SetColor(text_color_draw);
+            d2d_render_target->DrawText(
+                text_checkmate,
+                sizeof(text_checkmate) / sizeof(text_checkmate[0]),
+                text_format,
+                RectF(
+                    left, 
+                    top,
+                    right,
+                    bottom
+                ),
+                brush
+            );
         }
+    }
+    else if (game.IsCheck()) {
+        INT left = board_left;
+        INT right = board_left + BOARD_SIZE * tile_size;
+        INT top = 0;
+        INT bottom = board_top;
+        //if (game.IsWhiteTurn() || switched) {
+        //    top = board_top + BOARD_SIZE * tile_size;
+        //}
+        //else {
+        //top = board_top - tile_size;
+        //}
         brush->SetColor(text_color_check);
 
         transformation = Matrix3x2F::Identity();
@@ -374,9 +426,10 @@ void D2DClass::DrawTexts() {
             sizeof(text_check) / sizeof(text_check[0]),
             text_format,
             RectF(
-                left, top,
+                left, 
+                top,
                 right,
-                static_cast<FLOAT>(rc.bottom)
+                bottom
             ),
             brush
         );

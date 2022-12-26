@@ -54,26 +54,12 @@ private:
 
     D2D1_GRADIENT_STOP pawn_black_gradient_stops[2];
 
-
-
-    //ID2D1GradientStopCollection* rad_stops = nullptr;
-    //UINT const NUM_RAD_STOPS = 3;
-    //D2D1_GRADIENT_STOP rad_stops_data[3];
-    // - Pêdzle - gradient promienisty oczy
-    //ID2D1RadialGradientBrush* rad_brush2 = nullptr;
-    //ID2D1RadialGradientBrush* rad_brush3 = nullptr;
-    //ID2D1GradientStopCollection* rad_stops2 = nullptr;
-    //UINT const NUM_RAD_STOPS2 = 3;
-    //D2D1_GRADIENT_STOP rad_stops_data2[3];
-
     // - Macierz do po³¹czenia transformacji
     Matrix3x2F transformation;
 
     // Sta³e kolorów
     D2D1_COLOR_F const clear_color =
     { .r = 0.75f, .g = 0.75f, .b = 1.0f, .a = 1.0f };
-    D2D1_COLOR_F const brush_color =
-    { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
 
     D2D1_COLOR_F const picked_color =
     { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f };
@@ -82,8 +68,10 @@ private:
     D2D1_COLOR_F const legal_move_color =
     { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f };
 
-    D2D1_COLOR_F const white_piece_color = ColorF(ColorF::Beige, 1.0f);
-    D2D1_COLOR_F const black_piece_color = ColorF(ColorF::Chocolate, 1.0f);
+    D2D1_COLOR_F const black_tile_color =
+    { .r = 0.345f, .g = 0.176f, .b = 0.251f, .a = 1.0f };
+    D2D1_COLOR_F const white_tile_color =
+    { .r = 1.0f, .g = 0.694f, .b = 1.0f, .a = 1.0f };
 
     D2D1_COLOR_F const contour_color =
     { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
@@ -100,8 +88,6 @@ private:
     IWICFormatConverter* wic_converter = NULL;
     IWICBitmapFrameDecode* bmp_src = NULL;
 
-    ID2D1Bitmap* bmp_white_tile = NULL;
-    ID2D1Bitmap* bmp_black_tile = NULL;
     ID2D1Bitmap* bmp_white_knight = NULL;
     ID2D1Bitmap* bmp_black_knight = NULL;
     ID2D1Bitmap* bmp_white_bishop = NULL;
@@ -114,8 +100,6 @@ private:
     ID2D1Bitmap* bmp_black_king = NULL;
 
     // nazwy plików
-    LPCWSTR white_filename = L"check_white.png";
-    LPCWSTR black_filename = L"check_black.png";
     LPCWSTR knight_white_filename = L"knight_white.png";
     LPCWSTR knight_black_filename = L"knight_black.png";
     LPCWSTR bishop_white_filename = L"bishop_white.png";
@@ -131,6 +115,12 @@ private:
     WCHAR const text_check[6] = L"CHECK";
     D2D1_COLOR_F const text_color_check =
     { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
+    WCHAR const text_draw[5] = L"DRAW";
+    D2D1_COLOR_F const text_color_draw =
+    { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
+    WCHAR const text_checkmate[10] = L"CHECKMATE";
+    D2D1_COLOR_F const text_color_checkmate =
+    { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
 
     FLOAT board_rotation = 0.0f;
     FLOAT rotation_start_time = 0.0f;
@@ -142,9 +132,10 @@ private:
     INT count_rotations = 0;
 
     FLOAT picked_pulse_scale = 1.0f;
-    
 
     Game game;
+    BOOL is_draw = FALSE;
+    BOOL is_checkmate = FALSE;
 
     INT tile_size;
     INT board_left;
