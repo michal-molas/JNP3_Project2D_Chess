@@ -42,17 +42,17 @@ INT Game::PieceOnTile(Position p) {
     return -1;
 }
 
-void Game::AddLegalMoves(INT piece) {
-    INT dir = pieces[piece].is_white ? -1 : 1;
-    Position pos = pieces[piece].pos;
+void Game::AddLegalMoves() {
+    INT dir = pieces[picked_piece].is_white ? -1 : 1;
+    Position pos = pieces[picked_piece].pos;
     BOOL one_step_legal;
-    switch (pieces[piece].type)
+    switch (pieces[picked_piece].type)
     {
     case PieceType::PAWN:
         one_step_legal = AddMove(Position(pos.x, pos.y + dir), FALSE, FALSE, TRUE);
         AddMove(Position(pos.x + 1, pos.y + dir), FALSE, TRUE, FALSE);
         AddMove(Position(pos.x - 1, pos.y + dir), FALSE, TRUE, FALSE);
-        if (one_step_legal && pieces[piece].is_first_move) {
+        if (one_step_legal && pieces[picked_piece].is_first_move) {
             AddMove(Position(pos.x, pos.y + 2 * dir), FALSE, FALSE, TRUE);
         }
         break;
@@ -547,6 +547,20 @@ BOOL Game::IsKingChecked(BOOL is_white) {
     return result;
 }
 
+BOOL Game::IsMate(BOOL is_white) {
+    is_white_turn = !is_white_turn;
+    tiles.clear();
+    for (size_t i = 0; i < pieces.size(); i++) {
+        if (!pieces[i].is_dead && pieces[i].is_white == is_white) {
+            picked_piece = i;
+            AddLegalMoves();
+        }
+    }
+    picked_piece = -1;
+    is_white_turn = !is_white_turn;
+    return tiles.empty();
+}
+
 BOOL Game::HandleClick(Position pos) {
     // pierwsze klikniêcie
 
@@ -554,7 +568,7 @@ BOOL Game::HandleClick(Position pos) {
         picked_piece = PieceOnTile(pos);
         if (picked_piece != -1 && pieces[picked_piece].is_white == is_white_turn) {
             picked_pos = pos;
-            AddLegalMoves(picked_piece);
+            AddLegalMoves();
         }
         else {
             wrong_pos = pos;
@@ -578,6 +592,9 @@ BOOL Game::HandleClick(Position pos) {
                 is_check = TRUE;
                 who_checks.clear();
                 CheckWhoChecks(!is_white_turn);
+                if (IsMate(!is_white_turn)) {
+                    exit(0);
+                }
             }
 
             is_white_turn = !is_white_turn;
@@ -593,7 +610,7 @@ BOOL Game::HandleClick(Position pos) {
             picked_piece = PieceOnTile(pos);
             if (picked_piece != -1 && pieces[picked_piece].is_white == is_white_turn) {
                 picked_pos = pos;
-                AddLegalMoves(picked_piece);
+                AddLegalMoves();
             }
             else {
                 wrong_pos = pos;

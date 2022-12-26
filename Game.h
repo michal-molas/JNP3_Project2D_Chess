@@ -87,7 +87,7 @@ private:
 
     void AddAttackedTiles(INT piece, BOOL is_kings_move = FALSE);
 
-    void AddLegalMoves(INT piece);
+    void AddLegalMoves();
 
     BOOL AddMove(Position pos, BOOL can_uncover_king = FALSE, BOOL is_attack_possible = TRUE, BOOL is_not_attack_possible = TRUE);
 
@@ -112,6 +112,8 @@ private:
     BOOL DoesMoveUncoverKing(Position end_pos);
 
     INT FindKing(BOOL is_white);
+
+    BOOL IsMate(BOOL is_white);
 public:
     Game();
 

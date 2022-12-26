@@ -130,7 +130,7 @@ private:
     BOOL switched = FALSE;
     INT count_rotations = 0;
 
-    FLOAT picked_pulse_scale = 1.0f; // 0.8 do 1.2
+    FLOAT picked_pulse_scale = 1.0f;
     
 
     Game game;
@@ -138,8 +138,6 @@ private:
     INT tile_size;
     INT board_left;
     INT board_top;
-
-    
 
     void LoadBmp(LPCWSTR filename, ID2D1Bitmap** bmp);
 
