@@ -43,17 +43,28 @@ private:
 
     // Interfejsy potrzebne do rysowania
     ID2D1SolidColorBrush* brush = nullptr;
-    // - Pêdzel - gradient promienisty stworek
-    ID2D1RadialGradientBrush* rad_brush = nullptr;
-    ID2D1GradientStopCollection* rad_stops = nullptr;
+    // - Pêdzel - gradient promienisty
+    ID2D1RadialGradientBrush* pawn_white_rad_gradient_brush = nullptr;
+    ID2D1GradientStopCollection* pawn_white_gradient_stops_colection = nullptr;
+
+    D2D1_GRADIENT_STOP pawn_white_gradient_stops[2];
+
+    ID2D1RadialGradientBrush* pawn_black_rad_gradient_brush = nullptr;
+    ID2D1GradientStopCollection* pawn_black_gradient_stops_colection = nullptr;
+
+    D2D1_GRADIENT_STOP pawn_black_gradient_stops[2];
+
+
+
+    //ID2D1GradientStopCollection* rad_stops = nullptr;
     //UINT const NUM_RAD_STOPS = 3;
-    D2D1_GRADIENT_STOP rad_stops_data[3];
+    //D2D1_GRADIENT_STOP rad_stops_data[3];
     // - Pêdzle - gradient promienisty oczy
-    ID2D1RadialGradientBrush* rad_brush2 = nullptr;
-    ID2D1RadialGradientBrush* rad_brush3 = nullptr;
-    ID2D1GradientStopCollection* rad_stops2 = nullptr;
-    UINT const NUM_RAD_STOPS2 = 3;
-    D2D1_GRADIENT_STOP rad_stops_data2[3];
+    //ID2D1RadialGradientBrush* rad_brush2 = nullptr;
+    //ID2D1RadialGradientBrush* rad_brush3 = nullptr;
+    //ID2D1GradientStopCollection* rad_stops2 = nullptr;
+    //UINT const NUM_RAD_STOPS2 = 3;
+    //D2D1_GRADIENT_STOP rad_stops_data2[3];
 
     // - Macierz do po³¹czenia transformacji
     Matrix3x2F transformation;

@@ -36,7 +36,7 @@ void D2DClass::InitDirect2D(HWND hwnd) {
     );
 
 
-    // bitmapy
+    // Utworzenie bitmap
     CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
     CoCreateInstance(
@@ -64,9 +64,56 @@ void D2DClass::InitDirect2D(HWND hwnd) {
     // Utworzenie pêdzla
     d2d_render_target->CreateSolidColorBrush(brush_color, &brush);
 
+    // Gradienty
+    pawn_white_gradient_stops[0].color = D2D1::ColorF(D2D1::ColorF::Aquamarine, 1);
+    pawn_white_gradient_stops[0].position = 0.0f;
+    pawn_white_gradient_stops[1].color = {.r = 1.0f, .g = 204.f / 255.f, .b = 153.f / 255.f, .a = 1.0f };
+    pawn_white_gradient_stops[1].position = 1.0f;
+
+    d2d_render_target->CreateGradientStopCollection(
+        pawn_white_gradient_stops,
+        2,
+        D2D1_GAMMA_2_2,
+        D2D1_EXTEND_MODE_CLAMP,
+        &pawn_white_gradient_stops_colection
+    );
+
+    d2d_render_target->CreateRadialGradientBrush(
+        D2D1::RadialGradientBrushProperties(
+            D2D1::Point2F(350, 250),
+            D2D1::Point2F(0, 0),
+            300,
+            300),
+        pawn_white_gradient_stops_colection,
+        &pawn_white_rad_gradient_brush
+    );
+
+    pawn_black_gradient_stops[0].color = D2D1::ColorF(D2D1::ColorF::Yellow, 1);
+    pawn_black_gradient_stops[0].position = 0.0f;
+    pawn_black_gradient_stops[1].color = { .r = 33.f / 255.f, .g = 8.f / 255.f, .b = 10.f / 255.f, .a = 1.0f };
+    pawn_black_gradient_stops[1].position = 1.0f;
+
+    d2d_render_target->CreateGradientStopCollection(
+        pawn_black_gradient_stops,
+        2,
+        D2D1_GAMMA_2_2,
+        D2D1_EXTEND_MODE_CLAMP,
+        &pawn_black_gradient_stops_colection
+    );
+
+    d2d_render_target->CreateRadialGradientBrush(
+        D2D1::RadialGradientBrushProperties(
+            D2D1::Point2F(350, 250),
+            D2D1::Point2F(0, 0),
+            200,
+            200),
+        pawn_black_gradient_stops_colection,
+        &pawn_black_rad_gradient_brush
+    );
+
     GeneratePawn();
 
-    // Pawn
+    // Parametry planszy
     INT min_size = min(rc.right, rc.bottom);
     tile_size = min_size / (BOARD_SIZE + 2);
     board_left = rc.right / 2 - (BOARD_SIZE / 2) * tile_size;
@@ -76,8 +123,10 @@ void D2DClass::InitDirect2D(HWND hwnd) {
 void D2DClass::DestroyDirect2D() {
     if (brush) brush->Release();
     brush = nullptr;
-    if (rad_brush) rad_brush->Release();
-    rad_brush = nullptr;
+    if (pawn_black_rad_gradient_brush) pawn_black_rad_gradient_brush->Release();
+    pawn_black_rad_gradient_brush = nullptr;
+    if (pawn_white_rad_gradient_brush) pawn_white_rad_gradient_brush->Release();
+    pawn_white_rad_gradient_brush = nullptr;
 
     if (d2d_render_target) d2d_render_target->Release();
     if (d2d_factory) d2d_factory->Release();
@@ -229,14 +278,12 @@ void D2DClass::DrawPawn(D2D1_POINT_2F center, BOOL is_white, BOOL is_picked) {
     }
     d2d_render_target->SetTransform(transformation);
 
-    //d2d_render_target->FillGeometry(pawn_path, rad_brush);
     if (is_white) {
-        brush->SetColor(white_piece_color);
+        d2d_render_target->FillGeometry(pawn_path, pawn_white_rad_gradient_brush);
     }
     else {
-        brush->SetColor(black_piece_color);
+        d2d_render_target->FillGeometry(pawn_path, pawn_black_rad_gradient_brush);
     }
-    d2d_render_target->FillGeometry(pawn_path, brush);
 
     brush->SetColor(contour_color);
     d2d_render_target->DrawGeometry(pawn_path, brush, contour_width);
