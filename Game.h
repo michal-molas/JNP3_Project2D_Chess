@@ -115,7 +115,7 @@ private:
 
     BOOL IsKingChecked(BOOL is_white);
 
-    void FilterNotAttackedTiles(BOOL by_white);
+    void FilterNotAttackedTiles(BOOL by_white, size_t count_moves);
 
     BOOL DoesMoveUncoverKing(Position end_pos);
 

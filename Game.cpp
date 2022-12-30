@@ -85,20 +85,21 @@ void Game::AddLegalMoves() {
 }
 
 void Game::AddKingsMoves(Position pos) {
-    AddMove(Position(pos.x - 1, pos.y), TRUE);
-    AddMove(Position(pos.x - 1, pos.y - 1), TRUE);
-    AddMove(Position(pos.x, pos.y - 1), TRUE);
-    AddMove(Position(pos.x + 1, pos.y - 1), TRUE);
-    AddMove(Position(pos.x + 1, pos.y), TRUE);
-    AddMove(Position(pos.x + 1, pos.y + 1), TRUE);
-    AddMove(Position(pos.x, pos.y + 1), TRUE);
-    AddMove(Position(pos.x - 1, pos.y + 1), TRUE);
+    size_t count_moves = 0;
+    count_moves += AddMove(Position(pos.x - 1, pos.y), TRUE);
+    count_moves += AddMove(Position(pos.x - 1, pos.y - 1), TRUE);
+    count_moves += AddMove(Position(pos.x, pos.y - 1), TRUE);
+    count_moves += AddMove(Position(pos.x + 1, pos.y - 1), TRUE);
+    count_moves += AddMove(Position(pos.x + 1, pos.y), TRUE);
+    count_moves += AddMove(Position(pos.x + 1, pos.y + 1), TRUE);
+    count_moves += AddMove(Position(pos.x, pos.y + 1), TRUE);
+    count_moves += AddMove(Position(pos.x - 1, pos.y + 1), TRUE);
 
     DisablePieceAt(pos);
     is_white_turn = !is_white_turn;
 
     // tutaj jest is_white turn przez zamianê w poprzedniej linijce
-    FilterNotAttackedTiles(is_white_turn);
+    FilterNotAttackedTiles(is_white_turn, count_moves);
 
     is_white_turn = !is_white_turn;
     EnablePieceAt(pos);
@@ -156,30 +157,34 @@ void Game::AddAttackedTiles(INT piece, BOOL is_kings_move) {
     }
 }
 
-void Game::FilterNotAttackedTiles(BOOL by_white) {
+void Game::FilterNotAttackedTiles(BOOL by_white, size_t count_moves) {
     BOOL result = FALSE;
 
-    std::vector<Tile> king_tiles = tiles;
-    std::vector<Tile> new_tiles;
+    std::vector<Tile> saved_tiles = tiles;
+    std::vector<Tile> new_tiles = tiles;
+
+    for (size_t i = 0; i < count_moves; i++) {
+        new_tiles.pop_back();
+    }
 
     BOOL is_attacked = FALSE;
-    for (auto& king_tile : king_tiles) {
+    for (size_t i = saved_tiles.size() - count_moves; i < saved_tiles.size(); i++) {
         tiles.clear();
-        DisablePieceAt(king_tile.pos);
+        DisablePieceAt(saved_tiles[i].pos);
         for (size_t i = 0; i < pieces.size(); i++) {
             if (!pieces[i].is_dead && pieces[i].is_white == by_white) {
                 AddAttackedTiles(i, TRUE);
             }
         }
-        EnablePieceAt(king_tile.pos);
+        EnablePieceAt(saved_tiles[i].pos);
         for (auto& att_tile : tiles) {
-            if (att_tile.pos == king_tile.pos) {
+            if (att_tile.pos == saved_tiles[i].pos) {
                 is_attacked = TRUE;
                 break;
             }
         }
         if (!is_attacked) {
-            new_tiles.push_back(king_tile);
+            new_tiles.push_back(saved_tiles[i]);
         }
         is_attacked = FALSE;
     }
