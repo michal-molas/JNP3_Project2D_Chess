@@ -76,11 +76,17 @@ private:
 	D2D1_COLOR_F const contour_color =
 	{ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
 
+	D2D1_COLOR_F const exit_color =
+	{ .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f };
+
 	FLOAT const contour_width = 3.0f;
 
 	// Interfejsy do obs³ugi œcie¿ki
 	ID2D1PathGeometry* pawn_path = nullptr;
 	ID2D1GeometrySink* pawn_path_sink = nullptr;
+
+	ID2D1PathGeometry* exit_path = nullptr;
+	ID2D1GeometrySink* exit_path_sink = nullptr;
 
 	// do wczytywania bitmap
 	IWICImagingFactory* wic_factory = NULL;
@@ -98,7 +104,6 @@ private:
 	ID2D1Bitmap* bmp_black_queen = NULL;
 	ID2D1Bitmap* bmp_white_king = NULL;
 	ID2D1Bitmap* bmp_black_king = NULL;
-	ID2D1Bitmap* bmp_exit = NULL;
 
 	// nazwy plików
 	LPCWSTR knight_white_filename = L"knight_white.png";
@@ -111,7 +116,6 @@ private:
 	LPCWSTR queen_black_filename = L"queen_black.png";
 	LPCWSTR king_white_filename = L"king_white.png";
 	LPCWSTR king_black_filename = L"king_black.png";
-	LPCWSTR exit_filename = L"exit-full-screen.png";
 
 	INT exit_top = 0;
 	INT exit_left = 0;
@@ -148,6 +152,8 @@ private:
 	INT board_top = 0;
 
 	void LoadBmp(LPCWSTR filename, ID2D1Bitmap** bmp);
+
+	void GenerateExitButtton();
 
 	void GeneratePawn();
 

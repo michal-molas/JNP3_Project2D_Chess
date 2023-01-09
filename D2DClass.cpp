@@ -59,7 +59,6 @@ void D2DClass::InitDirect2D(HWND hwnd) {
 	LoadBmp(queen_black_filename, &bmp_black_queen);
 	LoadBmp(king_white_filename, &bmp_white_king);
 	LoadBmp(king_black_filename, &bmp_black_king);
-	LoadBmp(exit_filename, &bmp_exit);
 
 
 	// Utworzenie pêdzla
@@ -114,14 +113,15 @@ void D2DClass::InitDirect2D(HWND hwnd) {
 
 	GeneratePawn();
 
+	exit_left = rc.right - 2 * exit_size;
+	exit_top = exit_size + exit_size / 2;
+	GenerateExitButtton();
+
 	// Parametry planszy
 	INT min_size = min(rc.right, rc.bottom);
 	tile_size = min_size / (BOARD_SIZE + 2);
 	board_left = rc.right / 2 - (BOARD_SIZE / 2) * tile_size;
 	board_top = tile_size;
-
-	exit_left = rc.right - 2 * exit_size;
-	exit_top = exit_size;
 }
 
 void D2DClass::DestroyDirect2D() {
@@ -160,6 +160,23 @@ void D2DClass::LoadBmp(LPCWSTR filename, ID2D1Bitmap** bmp) {
 	);
 
 	d2d_render_target->CreateBitmapFromWicBitmap(wic_converter, NULL, bmp);
+}
+
+void D2DClass::GenerateExitButtton() {
+	d2d_factory->CreatePathGeometry(&exit_path);
+	exit_path->Open(&exit_path_sink);
+	exit_path_sink->BeginFigure(Point2F(exit_left, exit_top), D2D1_FIGURE_BEGIN_FILLED);
+
+	exit_path_sink->AddQuadraticBezier(QuadraticBezierSegment(
+		Point2F(exit_left, exit_top - exit_size / 2), Point2F(exit_left + exit_size / 2, exit_top - exit_size / 2)));
+	exit_path_sink->AddQuadraticBezier(QuadraticBezierSegment(
+		Point2F(exit_left + exit_size, exit_top - exit_size / 2), Point2F(exit_left + exit_size, exit_top)));
+	exit_path_sink->AddQuadraticBezier(QuadraticBezierSegment(
+		Point2F(exit_left + exit_size, exit_top + exit_size / 2), Point2F(exit_left + exit_size / 2, exit_top + exit_size / 2)));
+	exit_path_sink->AddQuadraticBezier(QuadraticBezierSegment(
+		Point2F(exit_left, exit_top + exit_size / 2), Point2F(exit_left, exit_top)));
+	exit_path_sink->EndFigure(D2D1_FIGURE_END_OPEN);
+	exit_path_sink->Close();
 }
 
 void D2DClass::GeneratePawn() {
@@ -336,12 +353,28 @@ void D2DClass::DrawExitButton() {
 	transformation = Matrix3x2F::Identity();
 	d2d_render_target->SetTransform(transformation);
 
-	D2D1_RECT_F rect = D2D1::RectF(exit_left, exit_top, exit_left + exit_size, exit_top + exit_size);
-	d2d_render_target->DrawBitmap(bmp_exit, &rect);
+	brush->SetColor(exit_color);
+	d2d_render_target->FillGeometry(exit_path, brush);
+	brush->SetColor(contour_color);
+	d2d_render_target->DrawGeometry(exit_path, brush);
+
+	D2D1_RECT_F rect = D2D1::RectF(
+		exit_left + exit_size / 2 - exit_size / 16,
+		exit_top - exit_size / 2 + exit_size / 16,
+		exit_left + exit_size / 2 + exit_size / 16,
+		exit_top + exit_size / 2 - exit_size / 16
+	);
+
+	transformation = Matrix3x2F::Rotation(45.0f, Point2F(exit_left + exit_size / 2, exit_top));
+	d2d_render_target->SetTransform(transformation);
+	d2d_render_target->FillRectangle(&rect, brush);
+	transformation = Matrix3x2F::Rotation(135.0f, Point2F(exit_left + exit_size / 2, exit_top));
+	d2d_render_target->SetTransform(transformation);
+	d2d_render_target->FillRectangle(&rect, brush);
 }
 
 void D2DClass::HandleMouseClick(HWND hwnd, FLOAT mouse_x, FLOAT mouse_y) {
-	if (mouse_x >= exit_left && mouse_x <= exit_left + exit_size && mouse_y >= exit_top && mouse_y <= exit_top + exit_size) {
+	if (mouse_x >= exit_left && mouse_x <= exit_left + exit_size && mouse_y >= exit_top - exit_size / 2 && mouse_y <= exit_top + exit_size / 2) {
 		LANGID lang_id = GetUserDefaultUILanguage();
 		auto text = lang_id == MAKELANGID(LANG_POLISH, SUBLANG_POLISH_POLAND) ? TEXT("Czy chcesz opuœciæ grê?") : TEXT("Do you want to exit?");
 		if (MessageBox(hwnd, text,
