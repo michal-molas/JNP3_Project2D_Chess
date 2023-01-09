@@ -5,10 +5,10 @@ Jako projekt zaliczeniowy Direct2D, napisałem szachy dla dwóch graczy.
 Aplikacja działa w trybie pełnoekranowym.
 
 Z wymaganych elementów zaimplementowałem:
-- mapy bitowe: czarne i białe fiury (poza pionem) oraz przycisk opuszczenia programu.
+- mapy bitowe: czarne i białe fiury (poza pionem).
 - napisy: napisy wyświetlane w przypadku szacha, mata i pata.
 - gradienty: gradienty promieniste dla pionów czarnych oraz białych (odwzorowane w programie graficznym w bitmapach pozostałych figur).
-- ścieżki: kształt piona.
+- ścieżki: pion oraz przycisk opuszczenia programu.
 - prostokąty: pola planszy.
 
 Animacje:
